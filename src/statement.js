@@ -4,10 +4,19 @@ const plays = require("./plays.json");
 console.log(statement(invoices[0], plays));
 
 function statement(invoice, plays) {
-  let totalAmount = 0;
   let result = `Statement for ${invoice.customer}\n`;
 
-  // 声明式函数
+  for (let perf of invoice.performances) {
+    result += ` ${playFor(perf).name}: ${usd(amountFor(perf) / 100)} (${
+      perf.audience
+    } seats)\n`;
+  }
+
+  result += `Amount owed is ${usd(totalAmount() / 100)}\n`;
+  result += `You earned ${totalVolumeCredits()} credits\n`;
+  return result;
+
+  // 震惊，这还能写在result下面？？？
   function usd(aNumber) {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -59,14 +68,11 @@ function statement(invoice, plays) {
     return result;
   }
 
-  for (let perf of invoice.performances) {
-    result += ` ${playFor(perf).name}: ${usd(amountFor(perf) / 100)} (${
-      perf.audience
-    } seats)\n`;
-    totalAmount += amountFor(perf);
+  function totalAmount() {
+    let result = 0;
+    for (let perf of invoice.performances) {
+      result += amountFor(perf);
+    }
+    return result;
   }
-
-  result += `Amount owed is ${usd(totalAmount / 100)}\n`;
-  result += `You earned ${totalVolumeCredits()} credits\n`;
-  return result;
 }
