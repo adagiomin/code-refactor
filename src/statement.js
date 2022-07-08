@@ -5,8 +5,16 @@ console.log(statement(invoices[0], plays));
 
 function statement(invoice, plays) {
   let totalAmount = 0;
-  let volumeCredits = 0;
   let result = `Statement for ${invoice.customer}\n`;
+
+  // 声明式函数
+  function usd(aNumber) {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+    }).format(aNumber);
+  }
 
   function playFor(aPerformance) {
     return plays[aPerformance.playID];
@@ -42,17 +50,16 @@ function statement(invoice, plays) {
     return result;
   }
 
-  // 声明式函数
-  function usd(aNumber) {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-    }).format(aNumber);
+  function totalVolumeCredits() {
+    let result = 0;
+    // 大多数时候，重复一次这样的循环对性能的影响都可忽略不计
+    for (let perf of invoice.performances) {
+      result += volumeCreditsFor(perf);
+    }
+    return result;
   }
 
   for (let perf of invoice.performances) {
-    volumeCredits += volumeCreditsFor(perf);
     result += ` ${playFor(perf).name}: ${usd(amountFor(perf) / 100)} (${
       perf.audience
     } seats)\n`;
@@ -60,6 +67,6 @@ function statement(invoice, plays) {
   }
 
   result += `Amount owed is ${usd(totalAmount / 100)}\n`;
-  result += `You earned ${volumeCredits} credits\n`;
+  result += `You earned ${totalVolumeCredits()} credits\n`;
   return result;
 }
